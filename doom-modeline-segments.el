@@ -1569,6 +1569,18 @@ Requires `eyebrowse-mode' to be enabled or `tab-bar-mode' tabs to be created."
 ;; Perspective
 ;;
 
+(defun shorten-name (n)
+  (let* ((fb (string-match "/" n 1))
+         (fe (string-match "/" n (1+ fb)))
+         (x fe)
+         (n (substring n 0 (- (length n) 1))))
+    (while (setq x (string-match "/" n (1+ x))))
+    (let ((sb (match-beginning 0))
+          (se (length n)))
+
+      (concat (substring n fb fe)
+              "..."
+              (substring n sb se)))))
 (defvar-local doom-modeline--persp-name nil)
 (defun doom-modeline-update-persp-name (&rest _)
   "Update perspective name in mode-line."
@@ -1593,7 +1605,7 @@ Requires `eyebrowse-mode' to be enabled or `tab-bar-mode' tabs to be created."
               (concat (doom-modeline-spc)
                       (propertize (concat (and doom-modeline-persp-icon
                                                (concat icon (doom-modeline-vspc)))
-                                          (propertize name 'face face))
+                                          (propertize (shorten-name name) 'face face))
                                   'help-echo "mouse-1: Switch perspective
 mouse-2: Show help for minor mode"
                                   'mouse-face 'mode-line-highlight
