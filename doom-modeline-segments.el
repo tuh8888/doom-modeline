@@ -753,13 +753,6 @@ Uses `all-the-icons-material' to fetch the icon."
 
 ;; Flycheck
 
-(defcustom doom-modeline-flycheck-error-equivalents '((info . info)
-                                                      (warning . warning)
-                                                      (error . error))
-  "How to consider different flycheck errors when reporting in mode line."
-  :type 'alist
-  :group 'doom-modeline)
-
 (defun doom-modeline--flycheck-count-errors ()
   "Count the number of ERRORS, grouped by level.
 
@@ -769,10 +762,8 @@ level."
   (let ((errors (thread-last flycheck-current-errors
                              flycheck-count-errors
                              (seq-group-by (lambda (e)
-                                             (thread-first e
-                                                           car
-                                                           (assoc doom-modeline-flycheck-error-equivalents)
-                                                           cdr)))))
+                                             (let ((type (car e)))
+                                               (car (cl-remove-if (lambda (w) (string-match (symbol-name w) (symbol-name type))) '(info warning error))))))))
         (default-counts '((info . 0)
                           (warning . 0)
                           (error . 0))))
