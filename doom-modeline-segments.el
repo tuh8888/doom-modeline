@@ -753,24 +753,42 @@ Uses `all-the-icons-material' to fetch the icon."
 
 ;; Flycheck
 
+(defcustom doom-modeline-flycheck-error-equivalents '((info . info)
+                                                      (warning . warning)
+                                                      (error . error)
+                                                      (lsp-flycheck-info-unnecessary . info)
+                                                      (lsp-flycheck-warning-unnecessary . warning)
+                                                      (lsp-flycheck-error-unnecessary . error))
+  "How to consider different flycheck errors when reporting in mode line."
+  :type 'alist
+  :group 'doom-modeline)
+
 (defun doom-modeline--flycheck-count-errors ()
   "Count the number of ERRORS, grouped by level.
 
 Return an alist, where each ITEM is a cons cell whose `car' is an
 error level, and whose `cdr' is the number of errors of that
 level."
-  (let* ((errors (seq-group-by #'car (flycheck-count-errors flycheck-current-errors)))
-         (keys (cl-mapcar #'car errors)))
-    (cl-reduce (lambda (m k)
-                 (let ((count (thread-last errors
-                                           (assoc k)
-                                           (cdr)
-                                           (cl-mapcar #'cdr)
-                                           (cl-reduce #'+))))
-                   (cons (cons k count) m)))
-               keys :initial-value '((info . 0)
-                                     (warning . 0)
-                                     (error . 0)))))
+  (let ((errors (thread-last flycheck-current-errors
+                             flycheck-count-errors
+                             (seq-group-by (lambda (e)
+                                             (thread-first e
+                                                           car
+                                                           (assoc doom-modeline-flycheck-error-equivalents)
+                                                           cdr)))))
+        (default-counts '((info . 0)
+                          (warning . 0)
+                          (error . 0))))
+    (append (thread-last errors
+                         (cl-mapcar #'car)
+                         (cl-mapcar (lambda (k)
+                                      (thread-last errors
+                                                   (assoc k)
+                                                   cdr
+                                                   (cl-mapcar #'cdr)
+                                                   (cl-reduce #'+)
+                                                   (cons k)))))
+            default-counts)))
 
 (defvar-local doom-modeline--flycheck-icon nil)
 (defun doom-modeline-update-flycheck-icon (&optional status)
