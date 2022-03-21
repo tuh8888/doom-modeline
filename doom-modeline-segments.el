@@ -1570,17 +1570,9 @@ Requires `eyebrowse-mode' to be enabled or `tab-bar-mode' tabs to be created."
 ;;
 
 (defun shorten-name (n)
-  (let* ((fb (string-match "/" n 1))
-         (fe (string-match "/" n (1+ fb)))
-         (x fe)
-         (n (substring n 0 (- (length n) 1))))
-    (while (setq x (string-match "/" n (1+ x))))
-    (let ((sb (match-beginning 0))
-          (se (length n)))
+  (when (string-equal (doom-modeline--project-root) (expand-file-name n))
+    (doom-modeline--buffer-file-name n buffer-file-truename 'shrink 'shink 'hide)))
 
-      (concat (substring n fb fe)
-              "..."
-              (substring n sb se)))))
 (defvar-local doom-modeline--persp-name nil)
 (defun doom-modeline-update-persp-name (&rest _)
   "Update perspective name in mode-line."
