@@ -755,10 +755,7 @@ Uses `all-the-icons-material' to fetch the icon."
 
 (defcustom doom-modeline-flycheck-error-equivalents '((info . info)
                                                       (warning . warning)
-                                                      (error . error)
-                                                      (lsp-flycheck-info-unnecessary . info)
-                                                      (lsp-flycheck-warning-unnecessary . warning)
-                                                      (lsp-flycheck-error-unnecessary . error))
+                                                      (error . error))
   "How to consider different flycheck errors when reporting in mode line."
   :type 'alist
   :group 'doom-modeline)
