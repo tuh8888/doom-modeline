@@ -759,15 +759,19 @@ Uses `all-the-icons-material' to fetch the icon."
 Return an alist, where each ITEM is a cons cell whose `car' is an
 error level, and whose `cdr' is the number of errors of that
 level."
-  (let ((info 0) (warning 0) (error 0))
-    (mapc
-     (lambda (item)
-       (let ((count (cdr item)))
-         (pcase (flycheck-error-level-compilation-level (car item))
-           (0 (cl-incf info count))
-           (1 (cl-incf warning count))
-           (2 (cl-incf error count)))))
-     (flycheck-count-errors flycheck-current-errors))
+  (let* ((errors (copy-list (flycheck-count-errors flycheck-current-errors)))
+         (info (thread-last errors
+                            (cl-remove-if-not (lambda (item) (equal 'info (car item))))
+                            (cl-mapcar #'cdr)
+                            (reduce #'+)))
+         (warning (thread-last errors
+                               (cl-remove-if-not (lambda (item) (equal 'warning (car item))))
+                               (cl-mapcar #'cdr)
+                               (reduce #'+)))
+         (error  (thread-last errors
+                              (cl-remove-if-not (lambda (item) (equal 'warning (car item))))
+                              (cl-mapcar #'cdr)
+                              (reduce #'+))))
     `((info . ,info) (warning . ,warning) (error . ,error))))
 
 (defvar-local doom-modeline--flycheck-icon nil)
