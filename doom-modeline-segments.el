@@ -1569,10 +1569,46 @@ Requires `eyebrowse-mode' to be enabled or `tab-bar-mode' tabs to be created."
 ;; Perspective
 ;;
 
-(defun shorten-name (n)
-  (if (string-equal (doom-modeline--project-root) (expand-file-name n))
-      (doom-modeline--buffer-file-name n buffer-file-truename 'shrink 'shink 'hide)
-    n))
+(defun doom-modeline--persp-name (name
+                                  &optional
+                                  truncate-project-root-parent
+                                  truncate-project-relative-path
+                                  hide-project-root-parent)
+  ;; When the persp name is derived from a file, truncate it.
+  (if (file-exists-p (expand-file-name name))
+      (let ((file-path name)
+            (project-root (file-local-name name)))
+        (concat
+         ;; Project root parent
+         (unless hide-project-root-parent
+           (when-let (root-path-parent
+                      (file-name-directory (directory-file-name project-root)))
+             (propertize
+              (if (and truncate-project-root-parent
+                       (not (string-empty-p root-path-parent))
+                       (not (string= root-path-parent "/")))
+                  (shrink-path--dirs-internal root-path-parent t)
+                (abbreviate-file-name root-path-parent))
+              'face 'doom-modeline-project-parent-dir)))
+         ;; Project directory
+         (propertize
+          (concat (file-name-nondirectory (directory-file-name project-root)) "/")
+          'face 'doom-modeline-project-dir)
+         ;; relative path
+         (propertize
+          (when-let (relative-path (file-relative-name
+                                    (or (file-name-directory file-path) "./")
+                                    project-root))
+            (if (string= relative-path "./")
+                ""
+              (if truncate-project-relative-path
+                  (substring (shrink-path--dirs-internal relative-path t) 1)
+                relative-path)))
+          'face 'doom-modeline-buffer-path)
+         ;; File name
+         (propertize (file-name-nondirectory file-path)
+                     'face 'doom-modeline-buffer-file)))
+    name))
 
 (defvar-local doom-modeline--persp-name nil)
 (defun doom-modeline-update-persp-name (&rest _)
@@ -1598,7 +1634,7 @@ Requires `eyebrowse-mode' to be enabled or `tab-bar-mode' tabs to be created."
               (concat (doom-modeline-spc)
                       (propertize (concat (and doom-modeline-persp-icon
                                                (concat icon (doom-modeline-vspc)))
-                                          (propertize (shorten-name name) 'face face))
+                                          (propertize (doom-modeline--persp-name name 'shink 'shrink 'hide) 'face face))
                                   'help-echo "mouse-1: Switch perspective
 mouse-2: Show help for minor mode"
                                   'mouse-face 'mode-line-highlight
