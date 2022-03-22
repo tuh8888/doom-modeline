@@ -1570,8 +1570,9 @@ Requires `eyebrowse-mode' to be enabled or `tab-bar-mode' tabs to be created."
 ;;
 
 (defun shorten-name (n)
-  (when (string-equal (doom-modeline--project-root) (expand-file-name n))
-    (doom-modeline--buffer-file-name n buffer-file-truename 'shrink 'shink 'hide)))
+  (if (string-equal (doom-modeline--project-root) (expand-file-name n))
+      (doom-modeline--buffer-file-name n buffer-file-truename 'shrink 'shink 'hide)
+    n))
 
 (defvar-local doom-modeline--persp-name nil)
 (defun doom-modeline-update-persp-name (&rest _)
