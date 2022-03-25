@@ -1631,22 +1631,19 @@ Requires `eyebrowse-mode' to be enabled or `tab-bar-mode' tabs to be created."
                                            :v-adjust -0.225)))
             (when (or doom-modeline-display-default-persp-name
                       (not (string-equal persp-nil-name name)))
-              (concat (doom-modeline-spc)
-                      (propertize (concat (and doom-modeline-persp-icon
-                                               (concat icon (doom-modeline-vspc)))
-                                          (propertize (doom-modeline--persp-name name 'shink 'shrink 'hide) 'face face))
-                                  'help-echo "mouse-1: Switch perspective
+              (propertize (concat (and doom-modeline-persp-icon icon)
+                                  (propertize (doom-modeline--persp-name name 'shink 'shrink 'hide) 'face face))
+                          'help-echo "mouse-1: Switch perspective
 mouse-2: Show help for minor mode"
-                                  'mouse-face 'mode-line-highlight
-                                  'local-map (let ((map (make-sparse-keymap)))
-                                               (define-key map [mode-line mouse-1]
-                                                 #'persp-switch)
-                                               (define-key map [mode-line mouse-2]
-                                                 (lambda ()
-                                                   (interactive)
-                                                   (describe-function 'persp-mode)))
-                                               map))
-                      (doom-modeline-spc)))))))
+                          'mouse-face 'mode-line-highlight
+                          'local-map (let ((map (make-sparse-keymap)))
+                                       (define-key map [mode-line mouse-1]
+                                         #'persp-switch)
+                                       (define-key map [mode-line mouse-2]
+                                         (lambda ()
+                                           (interactive)
+                                           (describe-function 'persp-mode)))
+                                       map)))))))
 
 (add-hook 'buffer-list-update-hook #'doom-modeline-update-persp-name)
 (add-hook 'find-file-hook #'doom-modeline-update-persp-name)
